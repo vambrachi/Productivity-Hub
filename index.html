@@ -117,6 +117,25 @@
             height: 30px;
         }
 
+        /* Sync Status Indicator */
+        .sync-status {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-align: center;
+            justify-content: center;
+        }
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #f1c40f; /* Yellow for local storage */
+            border-radius: 50%;
+            display: inline-block;
+        }
+
         /* Container for the rest of the app */
         .container {
             max-width: 1200px;
@@ -276,6 +295,7 @@
         /* Table Styling */
         .table-responsive {
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         table {
@@ -283,6 +303,7 @@
             border-collapse: collapse;
             font-size: 0.95rem;
             table-layout: fixed;
+            min-width: 600px;
         }
 
         thead {
@@ -673,49 +694,86 @@
                 min-height: 250px; 
                 height: auto; 
                 padding: 20px 0;
+                margin-bottom: 20px;
             }
             .clock-display { font-size: 4rem; }
             .greeting-display { font-size: 1.2rem; margin-top: 5px; }
 
-            .container { padding: 0 10px 40px 10px; }
+            .container { padding: 0 10px 80px 10px; /* Extra bottom padding for scrolling */ }
             
             .shortcuts-bar { gap: 15px; }
             .shortcut-btn { width: 50px; height: 50px; }
             .shortcut-btn svg { width: 24px; height: 24px; }
 
-            .input-group { flex-direction: column; gap: 10px; }
-            .controls { flex-direction: column; align-items: stretch; gap: 15px; }
+            .input-group { flex-direction: column; gap: 12px; }
+            .controls { flex-direction: column; align-items: stretch; gap: 15px; padding: 15px; }
             
+            /* Make inputs and buttons taller for touch */
+            input, select, button.add-btn {
+                height: 44px; /* Touch friendly height */
+                font-size: 16px; /* Prevent zoom */
+                box-sizing: border-box;
+            }
+
             .card-header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
+                gap: 15px;
+                padding: 15px;
             }
             
             .header-toggle {
-                align-self: flex-end; /* Position toggle to right even in column mode */
+                align-self: flex-start; /* Move to start to align with title */
+                opacity: 1; 
+                padding: 5px 0;
+            }
+            .header-toggle span {
+                max-width: none; /* Always show */
+                opacity: 1;
+            }
+            .header-toggle input {
+                width: 20px;
+                height: 20px;
             }
 
+            /* Calendar optimizations */
             .calendar-day { 
-                min-height: 50px; 
+                min-height: 70px; /* Slightly taller for ease */
                 font-size: 0.8rem;
                 padding: 4px;
             }
-            .task-marker { font-size: 0.65rem; padding: 2px 4px; }
-            
-            /* Ensure table scrolls horizontally but doesn't break layout */
-            .table-responsive {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
+            .task-marker { 
+                font-size: 0.75rem; /* Larger text for readability */
+                padding: 4px 6px; 
+                margin-bottom: 4px;
             }
-            table { min-width: 700px; }
             
-            .modal-content { width: 95%; margin: 10% auto; }
+            .modal-content { 
+                width: 90%; 
+                margin: 15% auto; 
+                max-height: 80vh;
+            }
+
+            /* Stack calendar controls properly */
+            .calendar-controls {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .calendar-controls h3 {
+                order: -1; /* Title on top */
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            .calendar-controls button {
+                flex-grow: 1;
+                height: 44px;
+            }
         }
         
         @media (max-width: 480px) {
              .clock-display { font-size: 3rem; }
              .main-title { font-size: 2rem; }
+             .shortcuts-section { padding-bottom: 20px; }
         }
     </style>
 </head>
@@ -733,72 +791,31 @@
 <!-- SHORTCUTS SECTION (SEPARATED) -->
 <div class="shortcuts-section">
     <div class="shortcuts-bar">
-        <!-- AI Assistant (New Feature) -->
-        <button onclick="openAIModal()" class="shortcut-btn" title="✨ AI Academic Assistant" style="background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);">
-            ✨
-        </button>
+        <!-- AI Assistant -->
+        <button onclick="openAIModal()" class="shortcut-btn" title="✨ AI Academic Assistant" style="background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);">✨</button>
 
         <!-- Gmail -->
-        <a href="https://mail.google.com" target="_blank" class="shortcut-btn" title="Gmail">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#EA4335" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                <polyline points="22,6 12,13 2,6"></polyline>
-            </svg>
-        </a>
-        <!-- Google Drive (Fixed Multi-color) -->
-        <a href="https://drive.google.com" target="_blank" class="shortcut-btn" title="Google Drive">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 18L9 5H18" stroke="#FBBC04"></path> <!-- Yellowish Top Left -->
-                <path d="M18 5L22 12L15 18" stroke="#4285F4"></path> <!-- Blue Right -->
-                <path d="M15 18H5" stroke="#34A853"></path> <!-- Green Bottom -->
-            </svg>
-        </a>
+        <a href="https://mail.google.com" target="_blank" class="shortcut-btn" title="Gmail"><svg viewBox="0 0 24 24" fill="none" stroke="#EA4335" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></a>
+        <!-- Google Drive -->
+        <a href="https://drive.google.com" target="_blank" class="shortcut-btn" title="Google Drive"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18L9 5H18" stroke="#FBBC04"></path><path d="M18 5L22 12L15 18" stroke="#4285F4"></path><path d="M15 18H5" stroke="#34A853"></path></svg></a>
         <!-- Google Docs -->
-        <a href="https://docs.google.com" target="_blank" class="shortcut-btn" title="Google Docs">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#4285F4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <line x1="10" y1="9" x2="8" y2="9"></line>
-            </svg>
-        </a>
+        <a href="https://docs.google.com" target="_blank" class="shortcut-btn" title="Google Docs"><svg viewBox="0 0 24 24" fill="none" stroke="#4285F4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg></a>
         <!-- Google Sheets -->
-        <a href="https://sheets.google.com" target="_blank" class="shortcut-btn" title="Google Sheets">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#34A853" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="8" y1="13" x2="16" y2="13"></line>
-                <line x1="8" y1="17" x2="16" y2="17"></line>
-                <line x1="12" y1="9" x2="12" y2="21"></line> <!-- Grid center line -->
-            </svg>
-        </a>
+        <a href="https://sheets.google.com" target="_blank" class="shortcut-btn" title="Google Sheets"><svg viewBox="0 0 24 24" fill="none" stroke="#34A853" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><line x1="12" y1="9" x2="12" y2="21"></line></svg></a>
         <!-- Google Slides -->
-        <a href="https://slides.google.com" target="_blank" class="shortcut-btn" title="Google Slides">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#FBBC04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2z"></path>
-                <rect x="7" y="7" width="10" height="8"></rect>
-            </svg>
-        </a>
+        <a href="https://slides.google.com" target="_blank" class="shortcut-btn" title="Google Slides"><svg viewBox="0 0 24 24" fill="none" stroke="#FBBC04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2z"></path><rect x="7" y="7" width="10" height="8"></rect></svg></a>
         <!-- Personal Expense Sheet -->
-        <a href="https://docs.google.com/spreadsheets/d/1RpsBOCboCx-1-ptaD8NJxUiDzZ9yJkmM/edit?gid=139199222#gid=139199222" target="_blank" class="shortcut-btn" title="My Expense Sheet">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 3v18h18"></path>
-                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path> <!-- Trend chart -->
-            </svg>
-        </a>
+        <a href="https://docs.google.com/spreadsheets/d/1RpsBOCboCx-1-ptaD8NJxUiDzZ9yJkmM/edit?gid=139199222#gid=139199222" target="_blank" class="shortcut-btn" title="My Expense Sheet"><svg viewBox="0 0 24 24" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path></svg></a>
         <!-- Running Plan -->
-        <a href="https://vambrachi.github.io/5k-Under-30/" target="_blank" class="shortcut-btn" title="My Running Plan">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-            </svg>
-        </a>
+        <a href="https://vambrachi.github.io/5k-Under-30/" target="_blank" class="shortcut-btn" title="My Running Plan"><svg viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></a>
+    </div>
+    
+    <div class="sync-status">
+        <span class="sync-dot"></span> Saved to Local Storage
     </div>
 </div>
 
 <div class="container">
-    <div class="subtitle">Research, Lecturing & Personal Activity Log • Data saves automatically</div>
-
     <!-- CALENDAR SECTION -->
     <div class="section-card">
         <div class="card-header calendar-header-bg">
@@ -812,7 +829,9 @@
             <h3 id="currentMonthYear">Month Year</h3>
             <button onclick="changeMonth(1)">Next &#10095;</button>
         </div>
-        <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="calendar-responsive">
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
     </div>
 
     <!-- RESEARCHER SECTION -->
@@ -823,10 +842,8 @@
                 <input type="checkbox" id="showCompletedRes" checked onchange="renderTable('researcher')"> <span>Show Completed</span>
             </label>
         </div>
-        
         <div class="controls">
             <input type="text" id="filterRes" onkeyup="filterTable('tableRes', 'filterRes')" class="search-box" placeholder="🔍 Search Researcher activities...">
-            
             <div class="input-group">
                 <input type="text" id="newResActivity" placeholder="Activity" style="flex: 2;">
                 <select id="newResStatus">
@@ -839,7 +856,6 @@
                 <button class="add-btn" onclick="addEntry('researcher')">Add Entry</button>
             </div>
         </div>
-
         <div class="table-responsive">
             <table id="tableRes">
                 <thead>
@@ -865,10 +881,8 @@
                 <input type="checkbox" id="showCompletedLec" checked onchange="renderTable('lecturer')"> <span>Show Completed</span>
             </label>
         </div>
-        
         <div class="controls">
             <input type="text" id="filterLec" onkeyup="filterTable('tableLec', 'filterLec')" class="search-box" placeholder="🔍 Search Lecturer activities...">
-            
             <div class="input-group">
                 <input type="text" id="newLecActivity" placeholder="Activity" style="flex: 2;">
                 <select id="newLecStatus">
@@ -881,7 +895,6 @@
                 <button class="add-btn" onclick="addEntry('lecturer')">Add Entry</button>
             </div>
         </div>
-
         <div class="table-responsive">
             <table id="tableLec">
                 <thead>
@@ -907,10 +920,8 @@
                 <input type="checkbox" id="showCompletedPer" checked onchange="renderTable('personal')"> <span>Show Completed</span>
             </label>
         </div>
-        
         <div class="controls">
             <input type="text" id="filterPer" onkeyup="filterTable('tablePer', 'filterPer')" class="search-box" placeholder="🔍 Search Personal tasks...">
-            
             <div class="input-group">
                 <input type="text" id="newPerActivity" placeholder="Task (e.g., LTO Renewal)" style="flex: 2;">
                 <select id="newPerStatus">
@@ -923,7 +934,6 @@
                 <button class="add-btn" onclick="addEntry('personal')">Add Entry</button>
             </div>
         </div>
-
         <div class="table-responsive">
             <table id="tablePer">
                 <thead>
@@ -946,10 +956,8 @@
         <div class="card-header docs-header">
             <h2>Important Documents Repository</h2>
         </div>
-        
         <div class="controls">
             <input type="text" id="filterDoc" onkeyup="filterTable('tableDoc', 'filterDoc')" class="search-box" placeholder="🔍 Search Documents...">
-            
             <div class="input-group">
                 <input type="text" id="newDocName" placeholder="Document Name (e.g. Diploma)" style="flex: 2;">
                 <select id="newDocCategory">
@@ -960,11 +968,9 @@
                     <option value="Financial">Financial</option>
                     <option value="Other">Other</option>
                 </select>
-                <!-- Removed direct input for Notes -->
                 <button class="add-btn" onclick="addEntry('documents')">Add Document</button>
             </div>
         </div>
-
         <div class="table-responsive">
             <table id="tableDoc">
                 <thead>
@@ -994,9 +1000,7 @@
                 <input type="text" id="modalLinkInput" placeholder="Paste URL here (e.g. https://google.com)">
                 <button class="add-btn" onclick="addLinkFromModal()">Add</button>
             </div>
-            <ul id="modalLinkList" class="link-list">
-                <!-- Links will appear here -->
-            </ul>
+            <ul id="modalLinkList" class="link-list"></ul>
         </div>
     </div>
 </div>
@@ -1495,18 +1499,16 @@
         if (type === 'documents') {
             const nameInput = document.getElementById('newDocName');
             const catInput = document.getElementById('newDocCategory');
-            // const noteInput = document.getElementById('newDocNotes'); // REMOVE
             
             if (!nameInput.value) { alert("Please enter a document name."); return; }
             
             activity = nameInput.value;
-            status = catInput.value; 
+            status = catInput.value; // Reusing 'status' field for Category
             remarks = ""; // Initialize empty, user uses modal to edit
-            date = ""; 
+            date = ""; // No date for docs
 
             // Clear inputs
             nameInput.value = '';
-            // noteInput.value = ''; // REMOVE
         } else {
             // Standard Tasks
             let prefix = '';
@@ -1516,7 +1518,6 @@
 
             const activityInput = document.getElementById(`${prefix}Activity`);
             const statusInput = document.getElementById(`${prefix}Status`);
-            // const remarksInput = document.getElementById(`${prefix}Remarks`); // REMOVE
             const dateInput = document.getElementById(`${prefix}Date`);
 
             if (!activityInput.value) { alert("Please enter an activity name."); return; }
@@ -1528,7 +1529,6 @@
 
             // Clear inputs
             activityInput.value = '';
-            // remarksInput.value = ''; // REMOVE
             dateInput.value = '';
             statusInput.value = 'Pending';
         }
@@ -1626,7 +1626,7 @@
                 marker.className = `task-marker ${task.type} ${task.status === 'Completed' ? 'completed' : ''}`;
                 marker.textContent = task.activity;
                 
-                let tooltipText = `${task.activity}\nStatus: ${task.status}\nRemarks: ${task.remarks}`;
+                let tooltipText = `${task.activity}\nStatus: ${task.status}\nRemarks: ${task.remarks || 'None'}`;
                 
                 // Add links summary to tooltip
                 if (task.links && task.links.length > 0) {
