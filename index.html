@@ -665,17 +665,57 @@
             margin-bottom: -2px;
         }
 
+        /* --- MOBILE OPTIMIZATION --- */
         @media (max-width: 768px) {
-            .input-group { flex-direction: column; }
-            .controls { flex-direction: column; align-items: stretch; }
-            .calendar-day { min-height: 60px; font-size: 0.8rem; }
-            .task-marker { font-size: 0.65rem; }
-            table { min-width: 700px; }
-            .modal-content { width: 95%; }
+            .main-title { font-size: 2.5rem; margin: 20px 0; }
             
-            /* Adjust clock size for mobile */
+            .hero-section { 
+                min-height: 250px; 
+                height: auto; 
+                padding: 20px 0;
+            }
             .clock-display { font-size: 4rem; }
-            .greeting-display { font-size: 1.5rem; }
+            .greeting-display { font-size: 1.2rem; margin-top: 5px; }
+
+            .container { padding: 0 10px 40px 10px; }
+            
+            .shortcuts-bar { gap: 15px; }
+            .shortcut-btn { width: 50px; height: 50px; }
+            .shortcut-btn svg { width: 24px; height: 24px; }
+
+            .input-group { flex-direction: column; gap: 10px; }
+            .controls { flex-direction: column; align-items: stretch; gap: 15px; }
+            
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .header-toggle {
+                align-self: flex-end; /* Position toggle to right even in column mode */
+            }
+
+            .calendar-day { 
+                min-height: 50px; 
+                font-size: 0.8rem;
+                padding: 4px;
+            }
+            .task-marker { font-size: 0.65rem; padding: 2px 4px; }
+            
+            /* Ensure table scrolls horizontally but doesn't break layout */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            table { min-width: 700px; }
+            
+            .modal-content { width: 95%; margin: 10% auto; }
+        }
+        
+        @media (max-width: 480px) {
+             .clock-display { font-size: 3rem; }
+             .main-title { font-size: 2rem; }
         }
     </style>
 </head>
