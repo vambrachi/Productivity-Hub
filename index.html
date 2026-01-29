@@ -117,25 +117,6 @@
             height: 30px;
         }
 
-        /* Sync Status Indicator */
-        .sync-status {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            text-align: center;
-            justify-content: center;
-        }
-        .sync-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #f1c40f; /* Yellow for local storage */
-            border-radius: 50%;
-            display: inline-block;
-        }
-
         /* Container for the rest of the app */
         .container {
             max-width: 1200px;
@@ -809,10 +790,6 @@
         <!-- Running Plan -->
         <a href="https://vambrachi.github.io/5k-Under-30/" target="_blank" class="shortcut-btn" title="My Running Plan"><svg viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></a>
     </div>
-    
-    <div class="sync-status">
-        <span class="sync-dot"></span> Saved to Local Storage
-    </div>
 </div>
 
 <div class="container">
@@ -1049,41 +1026,20 @@
         const now = new Date();
         const hours = now.getHours();
         const minutes = String(now.getMinutes()).padStart(2, '0');
-        
-        // 12-hour format conversion
-        let displayHours = hours % 12;
-        displayHours = displayHours ? displayHours : 12; 
+        let displayHours = hours % 12; displayHours = displayHours ? displayHours : 12; 
         const ampm = hours >= 12 ? 'PM' : 'AM';
-        
         document.getElementById('clock').textContent = `${displayHours}:${minutes} ${ampm}`;
         
         let greetingText;
-        let backgroundGradient;
-
-        // Logic for greeting AND background based on time of day
-        if (hours >= 5 && hours < 12) {
-            greetingText = "Good morning";
-            // Morning: Sunrise Orange/Pink
-            backgroundGradient = "linear-gradient(to bottom right, #ff9966, #ff5e62)"; 
-        } else if (hours >= 12 && hours < 18) {
-            greetingText = "Good afternoon";
-            // Afternoon: Bright Blue/Cyan
-            backgroundGradient = "linear-gradient(to bottom right, #2980b9, #6dd5fa, #ffffff)";
-        } else if (hours >= 18 && hours < 22) {
-            greetingText = "Good evening";
-            // Evening: The sunset colors you liked
-            backgroundGradient = "linear-gradient(to bottom right, #4a3b52, #965448, #c47c5d)";
-        } else {
-            greetingText = "Good night";
-            // Night: Dark Blue/Black
-            backgroundGradient = "linear-gradient(to bottom right, #0f2027, #203a43, #2c5364)";
-        }
+        let bg;
+        if (hours >= 5 && hours < 12) { greetingText = "Good morning"; bg = "linear-gradient(to bottom right, #ff9966, #ff5e62)"; }
+        else if (hours >= 12 && hours < 18) { greetingText = "Good afternoon"; bg = "linear-gradient(to bottom right, #2980b9, #6dd5fa, #ffffff)"; }
+        else if (hours >= 18 && hours < 22) { greetingText = "Good evening"; bg = "linear-gradient(to bottom right, #4a3b52, #965448, #c47c5d)"; }
+        else { greetingText = "Good night"; bg = "linear-gradient(to bottom right, #0f2027, #203a43, #2c5364)"; }
         
         document.getElementById('greeting').textContent = `${greetingText}, Bryan Kenneth.`;
-        document.body.style.background = backgroundGradient;
+        document.body.style.background = bg;
     }
-    
-    // Start clock immediately
     setInterval(updateClock, 1000);
     updateClock();
 
@@ -1503,7 +1459,7 @@
             if (!nameInput.value) { alert("Please enter a document name."); return; }
             
             activity = nameInput.value;
-            status = catInput.value; // Reusing 'status' field for Category
+            status = catInput.value; 
             remarks = ""; // Initialize empty, user uses modal to edit
             date = ""; // No date for docs
 
@@ -1608,7 +1564,7 @@
 
             const daysTasks = allTasks.filter(t => t.date === cellDateStr);
             
-            // Sort tasks: Personal tasks ('personal') first
+            // Sort: Personal First
             daysTasks.sort((a, b) => {
                 if (a.type === 'personal' && b.type !== 'personal') return -1;
                 if (a.type !== 'personal' && b.type === 'personal') return 1;
